@@ -24,6 +24,8 @@ class DozeSettingsFragment : PreferenceFragment(), Preference.OnPreferenceChange
     private var pickUpPreference: ListPreference? = null
     private var pocketPreference: SwitchPreference? = null
 
+    private var highBrightnessDozePref: SwitchPreference? = null
+
     private val handler = Handler(Looper.getMainLooper())
 
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
@@ -70,6 +72,14 @@ class DozeSettingsFragment : PreferenceFragment(), Preference.OnPreferenceChange
         pocketPreference?.isEnabled = dozeEnabled
         pocketPreference?.onPreferenceChangeListener = this
 
+        highBrightnessDozePref = findPreference(Utils.HIGH_BRIGHTNESS_DOZE_KEY)
+        if (Utils.isHighBrightnessDozeSupported()) {
+            updateHighBrightnessDozePref()
+            highBrightnessDozePref?.onPreferenceChangeListener = this
+        } else {
+            preferenceScreen.removePreference(highBrightnessDozePref)
+        }
+
         // Hide AOD if not supported and set all its dependents otherwise
         if (!Utils.alwaysOnDisplayAvailable(context)) {
             preferenceScreen.removePreference(alwaysOnDisplayPreference)
@@ -82,6 +92,9 @@ class DozeSettingsFragment : PreferenceFragment(), Preference.OnPreferenceChange
     override fun onPreferenceChange(preference: Preference, newValue: Any?): Boolean {
         if (preference.key == Utils.ALWAYS_ON_DISPLAY) {
             Utils.enableAlwaysOn(context, newValue as Boolean)
+            updateHighBrightnessDozePref()
+        } else if (preference.key == Utils.HIGH_BRIGHTNESS_DOZE_KEY) {
+            Utils.setHighBrightnessDozeEnabled(newValue as Boolean)
         }
         handler.post { Utils.checkDozeService(context) }
         return true
@@ -101,6 +114,11 @@ class DozeSettingsFragment : PreferenceFragment(), Preference.OnPreferenceChange
         alwaysOnDisplayPreference.isEnabled = isChecked
         pickUpPreference?.isEnabled = isChecked
         pocketPreference?.isEnabled = isChecked
+        updateHighBrightnessDozePref()
+    }
+
+    private fun updateHighBrightnessDozePref() {
+        highBrightnessDozePref?.isEnabled = Utils.isAlwaysOnEnabled(context) && Utils.isDozeEnabled(context)
     }
 
 }

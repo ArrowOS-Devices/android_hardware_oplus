@@ -14,6 +14,7 @@ class BootCompletedReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
         Log.d(TAG, "Starting")
         Utils.checkDozeService(context)
+        Utils.setHighBrightnessDozeEnabled(Utils.getHighBrightnessDozeEnabled(context))
     }
 
     companion object {

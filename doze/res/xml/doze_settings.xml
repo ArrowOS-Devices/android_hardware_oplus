@@ -36,6 +36,12 @@
         android:summary="@string/ambient_display_always_on_summary"
         android:persistent="false" />
 
+    <SwitchPreference
+        android:defaultValue="true"
+        android:key="high_brightness_doze"
+        android:title="@string/high_brightness_doze_title"
+        android:summary="@string/high_brightness_doze_summary" />
+
     <PreferenceCategory
         android:key="pickup_sensor"
         android:title="@string/pickup_sensor_title">

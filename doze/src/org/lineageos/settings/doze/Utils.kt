@@ -17,6 +17,8 @@ import android.provider.Settings.Secure.DOZE_ENABLED
 import android.util.Log
 import androidx.preference.PreferenceManager
 
+import java.io.File
+
 object Utils {
     private const val TAG = "DozeUtils"
 
@@ -30,6 +32,9 @@ object Utils {
 
     const val GESTURE_PICK_UP_KEY = "gesture_pick_up_type"
     const val GESTURE_POCKET_KEY = "gesture_pocket"
+
+    const val HIGH_BRIGHTNESS_DOZE_KEY = "high_brightness_doze"
+    const val LOW_BRIGHTNESS_DOZE_NODE = "/sys/kernel/oplus_display/aod_light_mode_set"
 
     private fun startService(context: Context) {
         Log.d(TAG, "Starting service")
@@ -103,5 +108,24 @@ object Utils {
 
     fun getSensor(sm: SensorManager, type: String?): Sensor? {
         return sm.getSensorList(Sensor.TYPE_ALL).find { it.stringType == type }
+    }
+
+    fun isHighBrightnessDozeSupported(): Boolean {
+        try {
+            val nodeFile = File(LOW_BRIGHTNESS_DOZE_NODE)
+            return nodeFile.canRead() && nodeFile.canWrite()
+        } catch (e: Exception) {
+            e.printStackTrace()
+            return false
+        }
+    }
+
+    fun setHighBrightnessDozeEnabled(enabled: Boolean) {
+        File(LOW_BRIGHTNESS_DOZE_NODE).writeText(if (enabled) "0" else "1") // Write 0 to the low brightness doze node if high brightness doze is enabled
+    }
+
+    fun getHighBrightnessDozeEnabled(context: Context): Boolean {
+        return PreferenceManager.getDefaultSharedPreferences(context)
+            .getBoolean(HIGH_BRIGHTNESS_DOZE_KEY, true)
     }
 }
